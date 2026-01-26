@@ -1,5 +1,9 @@
 import "dotenv/config";
 import { korisnik } from "./schema";
+import {kurs} from "./schema";
+import { napredak } from "./schema";
+import { kupljeniKursevi } from "./schema";
+import { videoLekcija } from "./schema";
 import { db } from "./index";
 import bcrypt from "bcrypt";
 
@@ -30,6 +34,20 @@ await db.insert(korisnik).values([
         uloga: "KLIJENT"
     },
 
-]);
+]).onConflictDoNothing({ target: korisnik.email });
+
+
+await db.insert(kurs).values({
+    
+        naziv:"Kurs za pocetnike",
+        opis:"Ovaj kurs je namenjen pocetnicama.",
+        cena: "15000",
+        kategorija:"beginner",
+        slika: "https://www.bozidarac.rs/data/profesionalno_sminkanje_kurs_beo.png",
+        edukator: "98ba1e58-845a-4056-beb5-2ec29c159168"
+
+    });
+
+    
 
 process.exit(0);
