@@ -1,13 +1,24 @@
 "use client";
+
 import { useState } from "react";
 import Image from "next/image";
 import { useCart } from "../context/KorpaContext";
-import { Search, ShoppingBasket, X, CheckCircle, AlertCircle, User, Tag } from "lucide-react";
+import { Search, ShoppingBasket, X, CheckCircle, AlertCircle, User, Tag, Edit, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-export default function KurseviContent({ pocetniKursevi }: { pocetniKursevi: any[] }) {
+export default function KurseviContent({
+  pocetniKursevi,
+  userRole,
+  userId
+}: {
+  pocetniKursevi: any[];
+  userRole: "KLIJENT" | "EDUKATOR" | null;
+  userId?: string | null;
+}) {
   const [search, setSearch] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const { addToCart, cart } = useCart();
+  const router = useRouter();
 
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
@@ -15,16 +26,10 @@ export default function KurseviContent({ pocetniKursevi }: { pocetniKursevi: any
     const vecUKorpi = cart.find((item) => item.id === k.id);
 
     if (vecUKorpi) {
-      setNotification({
-        message: "Ovaj kurs se već nalazi u vašoj korpi.",
-        type: "error",
-      });
+      setNotification({ message: "Ovaj kurs se već nalazi u vašoj korpi.", type: "error" });
     } else {
       addToCart({ id: k.id, naziv: k.naziv, cena: k.cena, slika: k.slika });
-      setNotification({
-        message: "Kurs je uspešno dodat u korpu!",
-        type: "success",
-      });
+      setNotification({ message: "Kurs je uspešno dodat u korpu!", type: "success" });
     }
   };
 
@@ -41,28 +46,17 @@ export default function KurseviContent({ pocetniKursevi }: { pocetniKursevi: any
           <div className="fixed inset-0 flex items-center justify-center z-[5000] p-4 bg-black/40 backdrop-blur-[2px]">
             <div className="bg-white rounded-3xl p-8 shadow-2xl border-2 border-[--color-accent] flex flex-col items-center max-w-sm w-full animate-in zoom-in duration-300">
               <div className={`mb-4 p-4 rounded-full ${notification.type === 'success' ? 'bg-green-100' : 'bg-amber-100'}`}>
-                {notification.type === "success" ? (
-                  <CheckCircle size={48} className="text-green-500" />
-                ) : (
-                  <AlertCircle size={48} className="text-amber-500" />
-                )}
+                {notification.type === "success" ? <CheckCircle size={48} className="text-green-500" /> : <AlertCircle size={48} className="text-amber-500" />}
               </div>
-              <p className="text-xl font-bold text-center text-[--color-text] mb-6">
-                {notification.message}
-              </p>
-              <button
-                onClick={() => setNotification(null)}
-                className="auth-btn !mt-0 !py-2 !px-8 shadow-md"
-              >
-                U redu
-              </button>
+              <p className="text-xl font-bold text-center text-[--color-text] mb-6">{notification.message}</p>
+              <button onClick={() => setNotification(null)} className="auth-btn !mt-0 !py-2 !px-8 shadow-md">U redu</button>
             </div>
           </div>
         )}
 
         <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
           <h1 className="text-4xl font-bold text-[--color-primary] border-b-2 border-[--color-accent] pb-2">
-            Istražite kurseve
+            {userRole === "EDUKATOR" ? "Moji kursevi" : "Istražite kurseve"}
           </h1>
           <div className="relative w-full md:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[--color-primary]" size={20} />
@@ -79,41 +73,44 @@ export default function KurseviContent({ pocetniKursevi }: { pocetniKursevi: any
           {filtriraniKursevi.map((k) => (
             <div key={k.id} className="bg-white rounded-3xl overflow-hidden shadow-lg border border-[--color-accent] flex flex-col hover:shadow-2xl transition-all group">
               <div className="relative h-52 w-full cursor-pointer overflow-hidden" onClick={() => setSelectedCourse(k)}>
-                <Image
-                  src={k.slika || "/placeholder.jpg"}
-                  alt={k.naziv}
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute top-4 right-4 bg-[--color-secondary] text-white px-3 py-1 rounded-full text-xs font-bold uppercase">
-                  {k.kategorija}
-                </div>
+                <Image src={k.slika || "/placeholder.jpg"} alt={k.naziv} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                <div className="absolute top-4 right-4 bg-[--color-secondary] text-white px-3 py-1 rounded-full text-xs font-bold uppercase">{k.kategorija}</div>
               </div>
 
               <div className="p-6 flex flex-col flex-grow">
                 <h2 className="text-2xl font-bold text-[--color-text] mb-2">{k.naziv}</h2>
-                <p
-                  className="text-gray-500 text-sm mb-4 line-clamp-2 cursor-pointer hover:text-[--color-primary]"
-                  onClick={() => setSelectedCourse(k)}
-                >
+                <p className="text-gray-500 text-sm mb-4 line-clamp-2 cursor-pointer hover:text-[--color-primary]" onClick={() => setSelectedCourse(k)}>
                   {k.opis} <span className="font-bold underline italic">vidi više</span>
                 </p>
 
                 <div className="flex items-center gap-2 mb-6">
                   <User size={16} className="text-[--color-primary]" />
-                  <span className="text-sm font-medium text-[--color-primary]">
-                    {k.edukatorIme} {k.edukatorPrezime}
-                  </span>
+                  <span className="text-sm font-medium text-[--color-primary]">{k.edukatorIme} {k.edukatorPrezime}</span>
                 </div>
 
                 <div className="flex items-center justify-between border-t border-[--color-accent] pt-4 mt-auto">
                   <span className="text-2xl font-black text-[--color-primary]">{k.cena} €</span>
-                  <button
-                    onClick={() => handleAddToCart(k)}
-                    className="auth-btn !w-auto !py-2 !px-4 !mt-0 text-sm"
-                  >
-                    <ShoppingBasket size={18} /> Dodaj u korpu
-                  </button>
+
+                  {userRole === "KLIJENT" ? (
+                    <button onClick={() => handleAddToCart(k)} className="auth-btn !w-auto !py-2 !px-4 !mt-0 text-sm flex items-center gap-1">
+                      <ShoppingBasket size={18} /> Dodaj u korpu
+                    </button>
+                  ) : userRole === "EDUKATOR" && k.edukatorId === userId ? (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => router.push(`/stranice/promena-kurseva?kursId=${k.id}`)}
+                        className="auth-btn !w-auto !py-2 !px-4 !mt-0 text-sm flex items-center gap-2 rounded-lg font-semibold bg-gradient-to-r from-[#FFF8D6] to-[#F9E79F] text-[#5a4a12] border border-[#efe2a7] shadow-sm hover:shadow-md transform transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#f2e6a5]/40"
+                      >
+                        <Edit size={18} /> Izmeni
+                      </button>
+                      <button
+                        onClick={() => router.push(`/stranice/obrisi-kurs/${k.id}`)}
+                        className="auth-btn !w-auto !py-2 !px-4 !mt-0 text-sm flex items-center gap-2 rounded-lg font-semibold bg-gradient-to-r from-[#E85952] to-[#D94B48] text-white shadow-md hover:shadow-lg transform transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#d94b48]/40 border border-[#c43f3a]"
+                      >
+                        <Trash2 size={18} /> Obriši
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -123,18 +120,12 @@ export default function KurseviContent({ pocetniKursevi }: { pocetniKursevi: any
         {selectedCourse && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[2000] backdrop-blur-sm">
             <div className="bg-[#FFFBE9] rounded-3xl max-w-2xl w-full p-6 md:p-8 relative shadow-2xl border-2 border-[--color-accent] flex flex-col max-h-[90vh] animate-in zoom-in duration-200">
-
-              <button
-                onClick={() => setSelectedCourse(null)}
-                className="absolute top-4 right-4 text-[--color-primary] hover:scale-110 transition-transform z-10"
-              >
+              <button onClick={() => setSelectedCourse(null)} className="absolute top-4 right-4 text-[--color-primary] hover:scale-110 transition-transform z-10">
                 <X size={32} />
               </button>
 
               <div className="mb-4">
-                <h2 className="text-3xl font-bold mb-2 text-[--color-primary] pr-10 leading-tight">
-                  {selectedCourse.naziv}
-                </h2>
+                <h2 className="text-3xl font-bold mb-2 text-[--color-primary] pr-10 leading-tight">{selectedCourse.naziv}</h2>
                 <div className="flex flex-wrap gap-3">
                   <div className="flex items-center gap-2 bg-[--color-accent]/30 px-3 py-1 rounded-full text-[--color-primary]">
                     <Tag size={14} />
@@ -154,21 +145,18 @@ export default function KurseviContent({ pocetniKursevi }: { pocetniKursevi: any
 
                 <div>
                   <h3 className="text-sm font-bold uppercase tracking-widest text-[--color-primary] mb-2">Opis kursa:</h3>
-                  <p className="text-[--color-text] leading-relaxed whitespace-pre-line text-lg">
-                    {selectedCourse.opis}
-                  </p>
+                  <p className="text-[--color-text] leading-relaxed whitespace-pre-line text-lg">{selectedCourse.opis}</p>
                 </div>
               </div>
 
-              <div className="flex justify-between items-center border-t border-[--color-accent] pt-6 mt-4">
-                <span className="text-3xl font-black text-[--color-primary]">{selectedCourse.cena} €</span>
-                <button
-                  onClick={() => { handleAddToCart(selectedCourse); setSelectedCourse(null); }}
-                  className="auth-btn !w-auto !px-10"
-                >
-                  Dodaj u korpu
-                </button>
-              </div>
+              {userRole === "KLIJENT" && (
+                <div className="flex justify-between items-center border-t border-[--color-accent] pt-6 mt-4">
+                  <span className="text-3xl font-black text-[--color-primary]">{selectedCourse.cena} €</span>
+                  <button onClick={() => { handleAddToCart(selectedCourse); setSelectedCourse(null); }} className="auth-btn !w-auto !px-10">
+                    Dodaj u korpu
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

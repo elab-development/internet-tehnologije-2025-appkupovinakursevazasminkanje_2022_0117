@@ -44,7 +44,7 @@ export default function Header() {
               <Link href="/stranice/pregled-klijenata" className="nav-link">Klijenti</Link>
               <Link href="/stranice/dodaj-kurs" className="nav-link">Dodaj kurs</Link>
               <Link href="/stranice/obrisi-kurs" className="nav-link">Obriši kurs</Link>
-              <Link href="/stranice/promeni-kurs" className="nav-link">Promeni kurs</Link>
+              <Link href="/stranice/promena-kurseva" className="nav-link">Promeni kurs</Link>
               <Link href="/stranice/svi-kursevi" className="nav-link">Kursevi</Link>
               <Link href="/stranice/pregled-prodaje-kurseva" className="nav-link">Pregled prodaje</Link>
 
