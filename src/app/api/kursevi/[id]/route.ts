@@ -5,7 +5,7 @@ import { eq, inArray, asc } from 'drizzle-orm';
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'REMOVED';
+const JWT_SECRET = process.env.JWT_SECRET || 'super_tajni_string_123';
 async function getEdukatorId() {
   try {
     const cookieStore = await cookies();
